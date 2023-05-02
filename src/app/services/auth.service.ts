@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LoginUser } from '../models/loginUser';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { JwtHelper, tokenNotExpired } from 'angular2-jwt';
+import { JwtHelperService, JWT_OPTIONS, JwtInterceptor } from '@auth0/angular-jwt';
 import { Router } from '@angular/router';
 import { AlertifyService } from './alertify.service';
 import { RegisterUser } from '../models/registerUser';
@@ -20,19 +20,24 @@ constructor(
 path = "https://localhost:44335/api/auth/";
 userToken: any;
 decodedToken: any;
-jwtHelper: JwtHelper = new JwtHelper();
+jwtHelper: JwtHelperService = new JwtHelperService();
 TOKEN_KEY = "token";
 
 login(loginUser: LoginUser){
   let headers = new HttpHeaders();
   headers = headers.append("Content-Type", "application/json")
-  this.httpClient.post(this.path + "login", loginUser, {headers:headers}).subscribe((data:any)=>{
-    this.saveToken(data['tokenString'])
-    this.userToken = data['tokenString']
-    this.decodedToken = this.jwtHelper.decodeToken(data['tokenString'])
-    this.alertifyService.success("Login is successfully completed.")
-    this.router.navigateByUrl('/city')
-
+  this.httpClient.post(this.path + "login", loginUser, {responseType: 'text'}).subscribe((data:any)=>{
+    console.log(data);
+    this.saveToken(data);
+    this.userToken = data;
+    this.decodedToken = this.jwtHelper.decodeToken(data);
+    console.log(this.decodedToken);
+    this.alertifyService.success("Login is successfully completed.");
+    this.router.navigateByUrl('/city');
+  }, 
+  (error: any)=>{
+    console.error(error);
+    this.alertifyService.error("Login failed.")
   });
 }
 
@@ -45,22 +50,25 @@ register(registerUser: RegisterUser){
 }
 
 saveToken(token: any){
-  localStorage.setItem(this.TOKEN_KEY , token)
+  localStorage.setItem(this.TOKEN_KEY, token);
 }
 
 logOut(){
-  localStorage.removeItem(this.TOKEN_KEY )
+  localStorage.removeItem(this.TOKEN_KEY)
+  this.alertifyService.success("Logout is successfully completed.");
 }
 
 loggedIn(){
-  return tokenNotExpired(this.TOKEN_KEY)
+  const token = this.token;
+  return !this.jwtHelper.isTokenExpired(token);
 }
 
 get token(){
-  return localStorage.getItem(this.TOKEN_KEY) as string;
+  const token = localStorage.getItem(this.TOKEN_KEY);
+  return token;
 }
 
 getCurrentUserId(){
-  return this.jwtHelper.decodeToken(this.token).nameid
+  return this.jwtHelper.decodeToken(this.userToken).nameid
 }
 }
