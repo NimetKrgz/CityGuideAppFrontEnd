@@ -1,7 +1,7 @@
 <main role="main">
   <div class="container">
     <div class="row">
-      <form [formGroup]="cityAddForm" (ngSubmit)= "add()" class="">
+      <form [formGroup]="cityAddForm" (ngSubmit)= "add()" class="form-cityadd">
         <h2 class="mt-3 pt-3">Add a new city</h2>
         <div class="form-group" class="mt-3 pt-3">
           <input type="text" id="name" formControlName = "name" class="form-control" placeholder="City name" autofocus>
@@ -12,6 +12,14 @@
 
         <div class="form-group" class="mt-3 pt-3">
           <input type="text" id="description" formControlName = "description" class="form-control" placeholder="Give a description" autofocus>
+<!--           <div>
+            <ngx-editor-menu [editor]="editor" >
+            </ngx-editor-menu>
+            <ngx-editor [editor] = "editor" class="form-control" id="description" name="description"  
+            formControlName = "description" [spellcheck] = true [placeholder] = "'Please enter a description'">  
+            </ngx-editor> 
+          </div>-->
+
           <span class="help-block" *ngIf="cityAddForm.get('description')?.hasError('required') && cityAddForm.get('description')?.touched"> 
             Description is required. 
           </span>
